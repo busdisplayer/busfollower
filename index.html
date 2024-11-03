@@ -3,51 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAEIV - Géolocalisation</title>
+    <title>SAEIV - Ligne de tramway</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
-            height: 500px;
+            height: 600px;
             width: 100%;
         }
     </style>
 </head>
 <body>
-    <h1>Système d'Aide à l'Exploitation et à l'Information Voyageurs</h1>
-    <p>Localisation actuelle :</p>
+    <h1>Ligne de tramway imaginaire</h1>
     <div id="map"></div>
+    <p id="result"></p>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Vérifier si la géolocalisation est prise en charge
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
+        const startLat = 45.447567;
+        const startLng = 4.361698;
+        const distanceBetweenStops = 300; // en mètres
+        const numStops = 10;
 
-                    // Afficher la position dans la console
-                    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-
-                    // Initialiser la carte
-                    const map = L.map('map').setView([latitude, longitude], 15);
-
-                    // Ajouter une couche de base OpenStreetMap
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap contributors'
-                    }).addTo(map);
-
-                    // Ajouter un marqueur à l'emplacement de l'utilisateur
-                    L.marker([latitude, longitude]).addTo(map)
-                        .bindPopup("Vous êtes ici.")
-                        .openPopup();
-                },
-                (error) => {
-                    console.error("Erreur de géolocalisation : ", error.message);
-                }
-            );
-        } else {
-            alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
+        // Fonction pour calculer la nouvelle position en déplaçant la latitude
+        function moveNorth(lat, lng, distance) {
+            const earthRadius = 6371000; // Rayon de la Terre en mètres
+            const dLat = distance / earthRadius * (180 / Math.PI);
+            return [lat + dLat, lng];
         }
+
+        // Générer les arrêts de la ligne de tramway
+        let tramStops = [];
+        for (let i = 0; i < numStops; i++) {
+            let stop = moveNorth(startLat, startLng, distanceBetweenStops * i);
+            tramStops.push(stop);
+        }
+
+        // Initialiser la carte
+        const map = L.map('map').setView([startLat, startLng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Ajouter les arrêts à la carte
+        tramStops.forEach((stop, index) => {
+            L.marker(stop).addTo(map).bindPopup(`Arrêt ${index + 1}`);
+        });
+
+        // Déterminer l'arrêt le plus proche de la position actuelle
+        function findClosestStop(currentLat, currentLng, stops) {
+            let closestDistance = Infinity;
+            let closestIndex = -1;
+
+            stops.forEach((stop, index) => {
+                let distance = getDistance(currentLat, currentLng, stop[0], stop[1]);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestIndex = index;
+                }
+            });
+
+            return closestIndex;
+        }
+
+        // Calcul de la distance entre deux points (en mètres)
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const earthRadius = 6371000;
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLng = (lng2 - lng1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLng / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return earthRadius * c;
+        }
+
+        // Simuler la position actuelle
+        const currentLat = 45.448567; // Position fictive légèrement au nord
+        const currentLng = 4.361698;
+
+        // Trouver l'arrêt le plus proche
+        const closestIndex = findClosestStop(currentLat, currentLng, tramStops);
+
+        // Déterminer l'arrêt précédent et le suivant
+        let nextStop, prevStop;
+        if (closestIndex !== -1) {
+            prevStop = closestIndex === 0 ? null : closestIndex - 1;
+            nextStop = closestIndex === tramStops.length - 1 ? null : closestIndex + 1;
+
+            document.getElementById('result').innerHTML = `
+                Arrêt le plus proche : Arrêt ${closestIndex + 1} <br>
+                Arrêt précédent : ${prevStop !== null ? `Arrêt ${prevStop + 1}` : 'N/A'} <br>
+                Arrêt suivant : ${nextStop !== null ? `Arrêt ${nextStop + 1}` : 'N/A'}
+            `;
+        }
+
+        // Marqueur pour la position actuelle
+        L.marker([currentLat, currentLng], { color: 'red' }).addTo(map)
+            .bindPopup("Position actuelle")
+            .openPopup();
     </script>
 </body>
 </html>
