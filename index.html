@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAEIV - Simulateur de déplacement</title>
+    <title>SAEIV - Simulateur avancé de déplacement</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
@@ -16,7 +16,7 @@
     </style>
 </head>
 <body>
-    <h1>Ligne de tramway imaginaire</h1>
+    <h1>Simulateur avancé de ligne de tramway</h1>
     <div id="map"></div>
     <div class="controls">
         <h2>Simulateur de déplacement</h2>
@@ -25,6 +25,11 @@
         <label for="longitude">Longitude :</label>
         <input type="number" id="longitude" step="0.000001" value="4.361698">
         <button onclick="updatePosition()">Déplacer</button>
+        <label for="direction">Sens de la ligne :</label>
+        <select id="direction" onchange="updateDirection()">
+            <option value="1">Vers l'arrêt 10</option>
+            <option value="-1">Vers l'arrêt 1</option>
+        </select>
     </div>
     <p id="result"></p>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -33,6 +38,7 @@
         const startLng = 4.361698;
         const distanceBetweenStops = 300; // en mètres
         const numStops = 10;
+        let direction = 1; // 1 pour aller vers l'arrêt 10, -1 pour aller vers l'arrêt 1
 
         // Fonction pour calculer la nouvelle position en déplaçant la latitude
         function moveNorth(lat, lng, distance) {
@@ -102,11 +108,16 @@
             // Trouver l'arrêt le plus proche
             const closestIndex = findClosestStop(currentLat, currentLng, tramStops);
 
-            // Déterminer l'arrêt précédent et le suivant
+            // Déterminer l'arrêt précédent et le suivant en fonction du sens
             let nextStop, prevStop;
             if (closestIndex !== -1) {
-                prevStop = closestIndex === 0 ? null : closestIndex - 1;
-                nextStop = closestIndex === tramStops.length - 1 ? null : closestIndex + 1;
+                if (direction === 1) { // Vers l'arrêt 10
+                    prevStop = closestIndex === 0 ? null : closestIndex - 1;
+                    nextStop = closestIndex === tramStops.length - 1 ? null : closestIndex + 1;
+                } else { // Vers l'arrêt 1
+                    prevStop = closestIndex === tramStops.length - 1 ? null : closestIndex + 1;
+                    nextStop = closestIndex === 0 ? null : closestIndex - 1;
+                }
 
                 document.getElementById('result').innerHTML = `
                     Arrêt le plus proche : Arrêt ${closestIndex + 1} <br>
@@ -115,6 +126,18 @@
                 `;
             }
         }
+
+        // Mettre à jour la direction du trajet
+        function updateDirection() {
+            direction = parseInt(document.getElementById('direction').value);
+            updatePosition();
+        }
+
+        // Mettre à jour automatiquement la position toutes les 15 secondes
+        setInterval(updatePosition, 15000);
+
+        // Initialiser la position pour le premier affichage
+        updatePosition();
     </script>
 </body>
 </html>
