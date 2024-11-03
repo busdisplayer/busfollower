@@ -34,35 +34,31 @@
     <p id="result"></p>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        const startLat = 45.447567;
-        const startLng = 4.361698;
-        const distanceBetweenStops = 300; // en mètres
-        const numStops = 10;
+        // Tableau des arrêts réels avec noms et coordonnées
+        const tramStops = [
+            { name: 'Arrêt 1', position: [45.447567, 4.361698] },
+            { name: 'Arrêt 2', position: [45.450000, 4.361900] },
+            { name: 'Arrêt 3', position: [45.452000, 4.362200] },
+            { name: 'Arrêt 4', position: [45.454000, 4.362500] },
+            { name: 'Arrêt 5', position: [45.456000, 4.362800] },
+            { name: 'Arrêt 6', position: [45.458000, 4.363100] },
+            { name: 'Arrêt 7', position: [45.460000, 4.363400] },
+            { name: 'Arrêt 8', position: [45.462000, 4.363700] },
+            { name: 'Arrêt 9', position: [45.464000, 4.364000] },
+            { name: 'Arrêt 10', position: [45.466000, 4.364300] }
+        ];
+
         let direction = 1; // 1 pour aller vers l'arrêt 10, -1 pour aller vers l'arrêt 1
 
-        // Fonction pour calculer la nouvelle position en déplaçant la latitude
-        function moveNorth(lat, lng, distance) {
-            const earthRadius = 6371000; // Rayon de la Terre en mètres
-            const dLat = distance / earthRadius * (180 / Math.PI);
-            return [lat + dLat, lng];
-        }
-
-        // Générer les arrêts de la ligne de tramway
-        let tramStops = [];
-        for (let i = 0; i < numStops; i++) {
-            let stop = moveNorth(startLat, startLng, distanceBetweenStops * i);
-            tramStops.push(stop);
-        }
-
         // Initialiser la carte
-        const map = L.map('map').setView([startLat, startLng], 15);
+        const map = L.map('map').setView(tramStops[0].position, 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
         // Ajouter les arrêts à la carte
         tramStops.forEach((stop, index) => {
-            L.marker(stop).addTo(map).bindPopup(`Arrêt ${index + 1}`);
+            L.marker(stop.position).addTo(map).bindPopup(`${stop.name}`);
         });
 
         // Marqueur pour la position actuelle
@@ -72,7 +68,7 @@
 
         // Calcul de la distance entre deux points (en mètres)
         function getDistance(lat1, lng1, lat2, lng2) {
-            const earthRadius = 6371000;
+            const earthRadius = 6371000; // Rayon de la Terre en mètres
             const dLat = (lat2 - lat1) * (Math.PI / 180);
             const dLng = (lng2 - lng1) * (Math.PI / 180);
             const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLng / 2) ** 2;
@@ -86,7 +82,7 @@
             let closestIndex = -1;
 
             stops.forEach((stop, index) => {
-                let distance = getDistance(currentLat, currentLng, stop[0], stop[1]);
+                let distance = getDistance(currentLat, currentLng, stop.position[0], stop.position[1]);
                 if (distance < closestDistance) {
                     closestDistance = distance;
                     closestIndex = index;
@@ -120,9 +116,9 @@
                 }
 
                 document.getElementById('result').innerHTML = `
-                    Arrêt le plus proche : Arrêt ${closestIndex + 1} <br>
-                    Arrêt précédent : ${prevStop !== null ? `Arrêt ${prevStop + 1}` : 'N/A'} <br>
-                    Arrêt suivant : ${nextStop !== null ? `Arrêt ${nextStop + 1}` : 'N/A'}
+                    Arrêt le plus proche : ${tramStops[closestIndex].name} <br>
+                    Arrêt précédent : ${prevStop !== null ? tramStops[prevStop].name : 'N/A'} <br>
+                    Arrêt suivant : ${nextStop !== null ? tramStops[nextStop].name : 'N/A'}
                 `;
             }
         }
