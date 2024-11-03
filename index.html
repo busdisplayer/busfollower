@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAEIV - Géolocalisation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Système d'Aide à l'Exploitation et à l'Information Voyageurs</h1>
+    <p>Localisation actuelle :</p>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Vérifier si la géolocalisation est prise en charge
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    // Afficher la position dans la console
+                    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+
+                    // Initialiser la carte
+                    const map = L.map('map').setView([latitude, longitude], 15);
+
+                    // Ajouter une couche de base OpenStreetMap
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    // Ajouter un marqueur à l'emplacement de l'utilisateur
+                    L.marker([latitude, longitude]).addTo(map)
+                        .bindPopup("Vous êtes ici.")
+                        .openPopup();
+                },
+                (error) => {
+                    console.error("Erreur de géolocalisation : ", error.message);
+                }
+            );
+        } else {
+            alert("La géolocalisation n'est pas prise en charge par votre navigateur.");
+        }
+    </script>
+</body>
+</html>
