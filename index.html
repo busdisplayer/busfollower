@@ -158,6 +158,8 @@
 
         // Lancer l'intervalle de lecture après une interaction de l'utilisateur
       startSpeaking();
+         const text = document.getElementById('scrolling-text').innerText;
+                speakText(text);
         // Tableau des arrêts réels avec noms et coordonnées
         const tramStops = [
             { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
