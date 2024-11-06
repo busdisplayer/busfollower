@@ -321,19 +321,21 @@ let currentMarker = L.marker([45.447187, 4.361264], {
         }
 
         // Mettre à jour automatiquement la position toutes les 15 secondes
-       navigator.geolocation.watchPosition(
-    (position) => {
-        updatePosition(position.coords.latitude, position.coords.longitude);
-    },
-    (error) => {
-        console.error('Erreur de localisation :', error);
-    },
-    {
-        enableHighAccuracy: true,  // Demande la meilleure précision possible
-        maximumAge: 0,             // Les données ne doivent pas être mises en cache
-        timeout: 15000              // Temps d'attente maximal de 5 secondes avant de déclencher une erreur
-    }
-);
+      setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            updatePosition(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+            console.error('Erreur de localisation :', error);
+        },
+        {
+            enableHighAccuracy: true,  // Demande la meilleure précision possible
+            maximumAge: 0,             // Les données ne doivent pas être mises en cache
+            timeout: 5000              // Temps d'attente maximal de 5 secondes avant de déclencher une erreur
+        }
+    );
+}, 5000); // Mettre à jour la position toutes les 5 secondes
 
         
 
