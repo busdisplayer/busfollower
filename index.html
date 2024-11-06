@@ -103,8 +103,8 @@
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            if (data.address && data.address.city) {
-                const city = data.address.city;
+            if (data.address && data.address.town) {
+                const city = data.address.town;
                 document.getElementById('city').innerText = city;  // Mettre à jour le nom de la ville
             } else {
                 document.getElementById('city').innerText = 'Ville inconnue';
