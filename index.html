@@ -324,11 +324,32 @@ let currentMarker = L.marker([45.447187, 4.361264], {
 
         // Mettre à jour la direction du trajet
         function updateDirection() {
-            direction = parseInt(document.getElementById('direction').value);
-            navigator.geolocation.getCurrentPosition((position) => {
-                updatePosition(position.coords.latitude, position.coords.longitude);
-            });
+    // Récupération de la valeur de direction et conversion en entier
+    const directionInput = document.getElementById('direction').value;
+    direction = parseInt(directionInput, 10);
+
+    // Vérification si la conversion est réussie et si la direction est un nombre valide
+    if (isNaN(direction)) {
+        console.error('Erreur : la direction entrée n\'est pas un nombre valide.');
+        return;
+    }
+
+    // Obtention de la position actuelle avec des options de précision
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            updatePosition(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+            console.error('Erreur de localisation :', error);
+        },
+        {
+            enableHighAccuracy: true, // Demande la meilleure précision possible
+            maximumAge: 0,            // Les données ne doivent pas être mises en cache
+            timeout: 5000             // Temps d'attente maximal de 5 secondes avant de déclencher une erreur
         }
+    );
+}
+
 
         // Obtenir la position actuelle de l'utilisateur
      navigator.geolocation.watchPosition(
