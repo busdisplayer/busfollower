@@ -133,7 +133,21 @@
         getCityNameFromCoordinates(lat, lng);
     });
 </script>
+<style>/* Animation CSS pour faire clignoter le marqueur */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
 
+.blinking-marker {
+    background-color: red;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+</style>
          
     </div>
     <div class="w3-center w3-blue" id="current-time"></div>
@@ -197,9 +211,18 @@
         });
 
         // Marqueur pour la position actuelle
-        let currentMarker = L.marker([45.447187, 4.361264], { color: 'red' }).addTo(map)
-            .bindPopup("Position actuelle")
-            .openPopup();
+       let currentMarker = L.marker([45.447187, 4.361264], {
+    icon: L.divIcon({
+        className: 'blinking-marker',  // Applique la classe CSS pour l'animation
+        iconSize: [20, 20],  // Taille de l'icône
+        iconAnchor: [10, 10],  // Point d'ancrage au centre du cercle
+        popupAnchor: [0, -10]  // Position du popup
+    })
+}).addTo(map)
+    .bindPopup("Position actuelle")
+    .openPopup();
+
+        
 
         // Fonction pour calculer la distance entre deux points (en mètres)
         function getDistance(lat1, lng1, lat2, lng2) {
