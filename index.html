@@ -283,7 +283,7 @@ let currentMarker = L.marker([45.447187, 4.361264], {
         function updatePosition(lat, lng) {
             // Mettre à jour le marqueur de la position actuelle
             currentMarker.setLatLng([lat, lng]);
-            getCityNameFromCoordinates(lat, lng);
+           
             map.setView([lat, lng], 15);
 
             // Trouver l'arrêt le plus proche
@@ -336,6 +336,7 @@ const updateInterval = 15000;  // Intervalle minimum entre les mises à jour en 
         if (currentTime - lastUpdateTime >= updateInterval) {
             // Si 5 secondes ou plus se sont écoulées depuis la dernière mise à jour
             updatePosition(position.coords.latitude, position.coords.longitude);
+            getCityNameFromCoordinates(lat, lng);
             lastUpdateTime = currentTime;  // Met à jour le temps de la dernière mise à jour
         }
     },
