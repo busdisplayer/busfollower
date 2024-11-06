@@ -331,11 +331,23 @@ let currentMarker = L.marker([45.447187, 4.361264], {
         }
 
         // Obtenir la position actuelle de l'utilisateur
-        navigator.geolocation.getCurrentPosition((position) => {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            updatePosition(lat, lng);
-        });
+     navigator.geolocation.watchPosition(
+  (position) => {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    getCityNameFromCoordinates(lat, lng);
+      updatePosition(lat, lng);
+  },
+  (error) => {
+    console.error('Erreur de localisation :', error);
+  },
+  {
+    enableHighAccuracy: true, // Demande la meilleure précision possible
+    maximumAge: 0,            // Les données ne doivent pas être mises en cache
+    timeout: 5000             // Temps d'attente maximal de 5 secondes avant de déclencher une erreur
+  }
+);
+
 
         // Mettre à jour automatiquement la position toutes les 15 secondes
         setInterval(() => {
