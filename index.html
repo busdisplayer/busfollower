@@ -173,60 +173,81 @@
         // Lancer l'intervalle de lecture après une interaction de l'utilisateur
       startSpeaking();
         // Tableau des arrêts réels avec noms et coordonnées
-        const tramStops = [
-            { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
-            { name: 'Boulevard du Haut Forez', position: [45.424540, 4.063420] },
-            { name: 'Grand Guérêt', position: [45.430492, 4.070815] },
-            { name: 'Fougerols', position: [45.442712, 4.069846] },
-            { name: 'Bourg Luriecq', position: [45.450712, 4.079833] },
-            { name: 'Cimetière Luriecq', position: [45.451689, 4.082541] },
-            { name: 'Sommeriecq', position: [45.458195, 4.106383] },
-            { name: 'Nus', position: [45.461349, 4.116152] },
-            { name: 'La Roche', position: [45.475127, 4.146196] },
-            { name: 'Mairie St Marcellin', position: [45.498649, 4.168315] },
-            { name: 'Le Placier', position: [45.501639, 4.171682] },
-            { name: 'Les Chaux', position: [45.522543, 4.182111] },
-            { name: 'Gare SNCF Sury le Comtal', position: [45.529290, 4.182424] },
-            { name: 'LEP St Claire', position: [45.536734, 4.188039] },
-            { name: 'De Gaulle', position: [45.537998, 4.188446] },
-            { name: 'D8 St Romain (pôle intermodal)', position: [45.564312, 4.138921] },
-            { name: 'Diana', position: [45.604919, 4.066135] },
-            { name: 'E. Beaune', position: [45.607368, 4.062192] },
-            { name: 'Lycée Beauregard', position: [45.609182, 4.056318] }
-        ];
+       const tramStops = [
+    { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
+    { name: 'Boulevard du Haut Forez', position: [45.424540, 4.063420] },
+    { name: 'Grand Guérêt', position: [45.430492, 4.070815] },
+    { name: 'Fougerols', position: [45.442712, 4.069846] },
+    { name: 'Bourg Luriecq', position: [45.450712, 4.079833] },
+    { name: 'Cimetière Luriecq', position: [45.451689, 4.082541] },
+    { name: 'Sommeriecq', position: [45.458195, 4.106383] },
+    { name: 'Nus', position: [45.461349, 4.116152] },
+    { name: 'La Roche', position: [45.475127, 4.146196] },
+    { name: 'Mairie St Marcellin', position: [45.498649, 4.168315] },
+    { name: 'Le Placier', position: [45.501639, 4.171682] },
+    { name: 'Les Chaux', position: [45.522543, 4.182111] },
+    { name: 'Gare SNCF Sury le Comtal', position: [45.529290, 4.182424] },
+    { name: 'LEP St Claire', position: [45.536734, 4.188039] },
+    { name: 'De Gaulle', position: [45.537998, 4.188446] },
+    { name: 'D8 St Romain (pôle intermodal)', position: [45.564312, 4.138921] },
+    { name: 'Diana', position: [45.604919, 4.066135] },
+    { name: 'E. Beaune', position: [45.607368, 4.062192] },
+    { name: 'Lycée Beauregard', position: [45.609182, 4.056318] }
+];
 
-        let direction = 1; // 1 pour aller vers Lycée Beauregard, -1 pour aller vers Saint-Bonnet le Château
+let direction = 1; // 1 pour aller vers Lycée Beauregard, -1 pour aller vers Saint-Bonnet le Château
 
-        // Initialiser la carte
-        const map = L.map('map').setView([45.447187, 4.361264], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+// Initialiser la carte
+const map = L.map('map').setView([45.447187, 4.361264], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-        const latlngs = tramStops.map(stop => stop.position);
+// Ajouter des marqueurs pour chaque arrêt
+tramStops.forEach(stop => {
+    L.marker(stop.position).addTo(map).bindPopup(`${stop.name}`);
+});
 
-        // Tracer la ligne entre les arrêts
-        const polyline = L.polyline(latlngs, {
-            color: 'blue',  // Couleur de la ligne
-            weight: 4,      // Épaisseur de la ligne
-            opacity: 0.7    // Opacité de la ligne
-        }).addTo(map);
+// Fonction pour calculer et tracer l'itinéraire
+function drawRoute(tramStops) {
+    if (tramStops.length < 2) return;
 
-        // Ajouter les arrêts à la carte
-        tramStops.forEach((stop) => {
-            L.marker(stop.position).addTo(map).bindPopup(`${stop.name}`);
-        });
+    const coordinates = tramStops.map(stop => stop.position[1] + ',' + stop.position[0]).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
 
-        // Marqueur pour la position actuelle
-       let currentMarker = L.marker([45.447187, 4.361264], {
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (window.routeLayer) {
+                map.removeLayer(window.routeLayer);
+            }
+
+            const route = data.routes[0].geometry;
+            window.routeLayer = L.geoJSON(route, {
+                style: { color: 'blue', weight: 4, opacity: 0.7 }
+            }).addTo(map);
+
+            // Afficher la durée totale du trajet
+            const duration = data.routes[0].duration;
+            const hours = Math.floor(duration / 3600);
+            const minutes = Math.floor((duration % 3600) / 60);
+            console.log(`Temps estimé : ${hours} heures et ${minutes} minutes`);
+        })
+        .catch(err => console.error('Erreur lors du calcul de l\'itinéraire : ', err));
+}
+
+// Tracer l'itinéraire entre les arrêts
+drawRoute(tramStops);
+
+// Ajouter un marqueur pour la position actuelle
+let currentMarker = L.marker([45.447187, 4.361264], {
     icon: L.divIcon({
-        className: 'blinking-marker',  // Applique la classe CSS pour l'animation
-        iconSize: [20, 20],  // Taille de l'icône
-        iconAnchor: [10, 10],  // Point d'ancrage au centre du cercle
-        popupAnchor: [0, -10]  // Position du popup
+        className: 'blinking-marker',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        popupAnchor: [0, -10]
     })
-}).addTo(map)
-    .bindPopup("Position actuelle")
+}).addTo(map).bindPopup("Position actuelle");
 
         
 
