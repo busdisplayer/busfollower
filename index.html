@@ -102,6 +102,7 @@
         const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
 
         try {
+            await new Promise(resolve => setTimeout(resolve, 5000));
             const response = await fetch(url);  // Attendre la réponse de l'API
             if (!response.ok) {
                 throw new Error('Erreur de récupération des données de l\'API');  // Si la réponse n'est pas correcte, lever une exception
