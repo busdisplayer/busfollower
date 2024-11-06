@@ -96,26 +96,44 @@
 </div>
     
     <!-- Panneau défilant avec la prochaine station et la destination -->
-   <script>
-       function getCityNameFromCoordinates(lat, lng) {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+<script>
+    function getCityNameFromCoordinates(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
 
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            if (data.address && data.address.town) {
-                const city = data.address.town;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let city = '';
+
+                // Vérification des différentes propriétés dans l'ordre
+                if (data.address && data.address.city) {
+                    city = data.address.city;  // Ville
+                } else if (data.address && data.address.town) {
+                    city = data.address.town;  // Ville (au sens plus large)
+                } else if (data.address && data.address.village) {
+                    city = data.address.village;  // Village
+                } else if (data.address && data.address.hamlet) {
+                    city = data.address.hamlet;  // Hamlet (hameau)
+                } else {
+                    city = 'Localité inconnue';  // Si aucune de ces propriétés n'est trouvée
+                }
+
                 document.getElementById('city').innerText = city;  // Mettre à jour le nom de la ville
-            } else {
-                document.getElementById('city').innerText = 'Ville inconnue';
-            }
-        })
-        .catch(error => {
-            console.error('Erreur : ', error);
-            document.getElementById('city').innerText = 'Erreur de récupération';
-        });
-}
-   </script>
+            })
+            .catch(error => {
+                console.error('Erreur : ', error);
+                document.getElementById('city').innerText = 'Erreur de récupération';
+            });
+    }
+
+    // Exemple d'appel avec des coordonnées GPS
+    navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        getCityNameFromCoordinates(lat, lng);
+    });
+</script>
+
          
     </div>
     <div class="w3-center w3-blue" id="current-time"></div>
