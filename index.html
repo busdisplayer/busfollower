@@ -91,12 +91,32 @@
         <p id="scrolling-text">Prochaine station: Chargement... | Destination: Chargement...</p>
     </div>
     <div class="w3-center" id="map"></div>
+<div id="city-name">
+    <h2>Ville : <span id="city">Chargement...</span></h2>
+</div>
     
     <!-- Panneau défilant avec la prochaine station et la destination -->
-   
+   <script>
+       function getCityNameFromCoordinates(lat, lng) {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
 
-   
-        
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.address && data.address.city) {
+                const city = data.address.city;
+                document.getElementById('city').innerText = city;  // Mettre à jour le nom de la ville
+            } else {
+                document.getElementById('city').innerText = 'Ville inconnue';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur : ', error);
+            document.getElementById('city').innerText = 'Erreur de récupération';
+        });
+}
+   </script>
+         
     </div>
     <div class="w3-center w3-blue" id="current-time"></div>
 
@@ -192,6 +212,7 @@
         function updatePosition(lat, lng) {
             // Mettre à jour le marqueur de la position actuelle
             currentMarker.setLatLng([lat, lng]);
+            getCityNameFromCoordinates(lat, lng);
             map.setView([lat, lng], 15);
 
             // Trouver l'arrêt le plus proche
