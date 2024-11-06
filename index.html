@@ -127,11 +127,22 @@
     }
 
     // Exemple d'appel avec des coordonnées GPS
-    navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        getCityNameFromCoordinates(lat, lng);
-    });
+    navigator.geolocation.watchPosition(
+  (position) => {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    getCityNameFromCoordinates(lat, lng);
+  },
+  (error) => {
+    console.error('Erreur de localisation :', error);
+  },
+  {
+    enableHighAccuracy: true, // Demande la meilleure précision possible
+    maximumAge: 0,            // Les données ne doivent pas être mises en cache
+    timeout: 5000             // Temps d'attente maximal de 5 secondes avant de déclencher une erreur
+  }
+);
+
 </script>
 <style>/* Animation CSS pour faire clignoter le marqueur */
 @keyframes blink {
