@@ -102,6 +102,14 @@
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+    function speakText(text) {
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = 'fr-FR'; // Langue française
+    speech.rate = 1; // Vitesse de la parole (1 est la vitesse normale)
+    speech.pitch = 1; // Tonalité de la voix (1 est la tonalité normale)
+    window.speechSynthesis.speak(speech);
+}
+        setInterval(speakText(document.getElementById('scrolling-text').innerText),60000);
         // Tableau des arrêts réels avec noms et coordonnées
         const tramStops = [
             { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
