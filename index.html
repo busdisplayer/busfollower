@@ -97,44 +97,43 @@
     
     <!-- Panneau défilant avec la prochaine station et la destination -->
 <script>
-    function getCityNameFromCoordinates(lat, lng) {
+    async function getCityNameFromCoordinates(lat, lng) {
         // Construction de l'URL de l'API
         const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
 
-        fetch(url)
-            .then(response => {
-                // Vérification que la réponse est correcte (code HTTP 200)
-                if (!response.ok) {
-                    throw new Error('Erreur de récupération des données de l\'API');
-                }
-                return response.json();  // Convertir la réponse en JSON
-            })
-            .then(data => {
-                let city = '';
+        try {
+            const response = await fetch(url);  // Attendre la réponse de l'API
+            if (!response.ok) {
+                throw new Error('Erreur de récupération des données de l\'API');  // Si la réponse n'est pas correcte, lever une exception
+            }
 
-                // Vérification des différentes propriétés dans l'ordre pour trouver la ville
-                if (data.address && data.address.city) {
-                    city = data.address.city;  // Ville
-                } else if (data.address && data.address.town) {
-                    city = data.address.town;  // Ville (au sens plus large)
-                } else if (data.address && data.address.village) {
-                    city = data.address.village;  // Village
-                } else if (data.address && data.address.hamlet) {
-                    city = data.address.hamlet;  // Hamlet (hameau)
-                } else {
-                    city = 'Localité inconnue';  // Si aucune de ces propriétés n'est trouvée
-                }
+            const data = await response.json();  // Attendre que la réponse soit convertie en JSON
 
-                // Mettre à jour le contenu de l'élément HTML avec l'ID 'city'
-                document.getElementById('city').innerText = city;
-            })
-            .catch(error => {
-                console.error('Erreur : ', error);
-                // Afficher un message d'erreur dans l'élément HTML avec l'ID 'city'
-                document.getElementById('city').innerText = 'Erreur de récupération';
-            });
+            let city = '';
+
+            // Vérification des différentes propriétés dans l'ordre pour trouver la ville
+            if (data.address && data.address.city) {
+                city = data.address.city;  // Ville
+            } else if (data.address && data.address.town) {
+                city = data.address.town;  // Ville (au sens plus large)
+            } else if (data.address && data.address.village) {
+                city = data.address.village;  // Village
+            } else if (data.address && data.address.hamlet) {
+                city = data.address.hamlet;  // Hamlet (hameau)
+            } else {
+                city = 'Localité inconnue';  // Si aucune de ces propriétés n'est trouvée
+            }
+
+            // Mettre à jour le contenu de l'élément HTML avec l'ID 'city'
+            document.getElementById('city').innerText = city;
+        } catch (error) {
+            console.error('Erreur : ', error);
+            // Afficher un message d'erreur dans l'élément HTML avec l'ID 'city'
+            document.getElementById('city').innerText = 'Erreur de récupération';
+        }
     }
 </script>
+
 <style>/* Animation CSS pour faire clignoter le marqueur */
 @keyframes blink {
     0% { opacity: 1; }
