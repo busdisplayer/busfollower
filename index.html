@@ -6,7 +6,7 @@
     <title>SAEIV - STAS</title>
     <link rel="shortcut icon" href="https://tse1.mm.bing.net/th?id=OIP.UFiKhbm0O6R-KcylNyNBVwHaEq&amp;pid=Api">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,7 +15,7 @@
             background-color: #f4f4f4;
         }
         #map {
-            height: 600px;
+            height: 400px;
             width: 100%;
             border: 2px solid #ccc;
             border-radius: 5px;
@@ -23,10 +23,11 @@
         }
         .controls {
             margin: 20px 0;
-            background: #fff;
+            background: #ffffff;
             padding: 10px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            color: #333;
         }
         label {
             margin-right: 10px;
@@ -34,24 +35,60 @@
         button {
             padding: 10px 15px;
             border: none;
-            background-color: #5cb85c;
+            background-color: #007bff;
             color: white;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #4cae4c;
+            background-color: #0056b3;
         }
         p {
             font-size: 16px;
             margin: 0;
         }
+        #current-time {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 10px;
+        }
+        .scrolling-panel {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        .scrolling-panel p {
+            display: inline-block;
+            animation: scroll 10s linear infinite;
+        }
+        @keyframes scroll {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(-100%);
+            }
+        }
     </style>
 </head>
 <body>
-    <h1 class="w3-center">SAEIV Fonctionnel</h1>
+    <h1 class="w3-center w3-text-blue">SAEIV Fonctionnel</h1>
+    
     <div id="map"></div>
+    
+    <!-- Panneau défilant avec la prochaine station et la destination -->
+    <div class="scrolling-panel">
+        <p id="scrolling-text">Prochaine station: Chargement... | Destination: Chargement...</p>
+    </div>
+
     <div class="w3-blue w3-xlarge w3-center w3-border controls">
         <h2>Informations sur la position</h2>
         <p id="result">Chargement des données...</p>
@@ -60,34 +97,35 @@
             <option value="1">Lycée Beauregard</option>
             <option value="-1">Saint-Bonnet le Château</option>
         </select>
+        <div id="current-time"></div>
     </div>
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
         // Tableau des arrêts réels avec noms et coordonnées
         const tramStops = [
-    { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
-    { name: 'Boulevard du Haut Forez', position: [45.424540, 4.063420] },
-    { name: 'Grand Guérêt', position: [45.430492, 4.070815] },
-    { name: 'Fougerols', position: [45.442712, 4.069846] },
-    { name: 'Bourg Luriecq', position: [45.450712, 4.079833] },
-    { name: 'Cimetière Luriecq', position: [45.451689, 4.082541] },
-    { name: 'Sommeriecq', position: [45.458195, 4.106383] },
-    { name: 'Nus', position: [45.461349, 4.116152] },
-    { name: 'La Roche', position: [45.475127, 4.146196] },
-    { name: 'Mairie St Marcellin', position: [45.498649, 4.168315] },
-    { name: 'Le Placier', position: [45.501639, 4.171682] },
-    { name: 'Les Chaux', position: [45.522543, 4.182111] },
-    { name: 'Gare SNCF Sury le Comtal', position: [45.529290, 4.182424] },
-    { name: 'LEP St Claire', position: [45.536734, 4.188039] },
-    { name: 'De Gaulle', position: [45.537998, 4.188446] },
-    { name: 'D8 St Romain (pôle intermodal)', position: [45.564312, 4.138921] },
-    { name: 'Diana', position: [45.604919, 4.066135] },
-    { name: 'E. Beaune', position: [45.607368, 4.062192] },
-    { name: 'Lycée Beauregard', position: [45.609182, 4.056318] }
-];
+            { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
+            { name: 'Boulevard du Haut Forez', position: [45.424540, 4.063420] },
+            { name: 'Grand Guérêt', position: [45.430492, 4.070815] },
+            { name: 'Fougerols', position: [45.442712, 4.069846] },
+            { name: 'Bourg Luriecq', position: [45.450712, 4.079833] },
+            { name: 'Cimetière Luriecq', position: [45.451689, 4.082541] },
+            { name: 'Sommeriecq', position: [45.458195, 4.106383] },
+            { name: 'Nus', position: [45.461349, 4.116152] },
+            { name: 'La Roche', position: [45.475127, 4.146196] },
+            { name: 'Mairie St Marcellin', position: [45.498649, 4.168315] },
+            { name: 'Le Placier', position: [45.501639, 4.171682] },
+            { name: 'Les Chaux', position: [45.522543, 4.182111] },
+            { name: 'Gare SNCF Sury le Comtal', position: [45.529290, 4.182424] },
+            { name: 'LEP St Claire', position: [45.536734, 4.188039] },
+            { name: 'De Gaulle', position: [45.537998, 4.188446] },
+            { name: 'D8 St Romain (pôle intermodal)', position: [45.564312, 4.138921] },
+            { name: 'Diana', position: [45.604919, 4.066135] },
+            { name: 'E. Beaune', position: [45.607368, 4.062192] },
+            { name: 'Lycée Beauregard', position: [45.609182, 4.056318] }
+        ];
 
-
-        let direction = 1; // 1 pour aller vers Nus, -1 pour aller vers Noël Blacet
+        let direction = 1; // 1 pour aller vers Lycée Beauregard, -1 pour aller vers Saint-Bonnet le Château
 
         // Initialiser la carte
         const map = L.map('map').setView([45.447187, 4.361264], 15);
@@ -143,10 +181,10 @@
             // Déterminer l'arrêt précédent et le suivant en fonction du sens
             let nextStop, prevStop;
             if (closestIndex !== -1) {
-                if (direction === 1) { // Vers Nus
+                if (direction === 1) { // Vers Lycée Beauregard
                     prevStop = closestIndex === 0 ? null : closestIndex - 1;
                     nextStop = closestIndex === tramStops.length - 1 ? null : closestIndex + 1;
-                } else { // Vers Noël Blacet
+                } else { // Vers Saint-Bonnet le Château
                     prevStop = closestIndex === tramStops.length - 1 ? null : closestIndex + 1;
                     nextStop = closestIndex === 0 ? null : closestIndex - 1;
                 }
@@ -156,6 +194,11 @@
                     Arrêt précédent : ${prevStop !== null ? tramStops[prevStop].name : 'N/A'} <br>
                     Arrêt suivant : ${nextStop !== null ? tramStops[nextStop].name : 'N/A'}
                 `;
+
+                // Mise à jour du panneau défilant
+                const nextStation = nextStop !== null ? tramStops[nextStop].name : 'N/A';
+                const destination = direction === 1 ? 'Lycée Beauregard' : 'Saint-Bonnet le Château';
+                document.getElementById('scrolling-text').innerText = `Prochaine station: ${nextStation} | Destination: ${destination}`;
             }
         }
 
@@ -180,6 +223,18 @@
                 updatePosition(position.coords.latitude, position.coords.longitude);
             });
         }, 15000);
+
+        // Fonction pour afficher l'heure actuelle
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('current-time').innerText = `Heure actuelle: ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Mise à jour de l'heure toutes les secondes
+        setInterval(updateTime, 1000);
     </script>
     <img class="w3-center" src="https://tse1.mm.bing.net/th?id=OIP.UFiKhbm0O6R-KcylNyNBVwHaEq&amp;pid=Api" style="width: 50%;">
 </body>
