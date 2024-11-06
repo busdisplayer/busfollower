@@ -172,8 +172,6 @@
 
         // Lancer l'intervalle de lecture après une interaction de l'utilisateur
       startSpeaking();
-         const text = document.getElementById('scrolling-text').innerText;
-                speakText(text);
         // Tableau des arrêts réels avec noms et coordonnées
         const tramStops = [
             { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
@@ -288,7 +286,7 @@
                 // Mise à jour du panneau défilant
                 const nextStation = nextStop !== null ? tramStops[nextStop].name : 'N/A';
                 const destination = direction === 1 ? 'Lycée Beauregard' : 'Saint-Bonnet le Château';
-                document.getElementById('scrolling-text').innerText = `Prochaine station: ${nextStation} | Destination: ${destination}`;
+                document.getElementById('scrolling-text').innerText = `Prochaine station: ${tramStops[closestIndex].name} | Destination: ${destination}`;
             }
         }
 
