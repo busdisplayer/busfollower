@@ -205,6 +205,15 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
+        const latlngs = tramStops.map(stop => stop.position);
+
+        // Tracer la ligne entre les arrêts
+        const polyline = L.polyline(latlngs, {
+            color: 'blue',  // Couleur de la ligne
+            weight: 4,      // Épaisseur de la ligne
+            opacity: 0.7    // Opacité de la ligne
+        }).addTo(map);
+
         // Ajouter les arrêts à la carte
         tramStops.forEach((stop) => {
             L.marker(stop.position).addTo(map).bindPopup(`${stop.name}`);
