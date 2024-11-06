@@ -139,8 +139,7 @@
         }
 
         // Lancer l'intervalle de lecture après une interaction de l'utilisateur
-        document.body.addEventListener('click', startSpeaking); // Pour les clics
-        document.body.addEventListener('touchstart', startSpeaking); // Pour les écrans tactiles
+      startSpeaking();
         // Tableau des arrêts réels avec noms et coordonnées
         const tramStops = [
             { name: 'Collège Émile Fallabrègue', position: [45.420195, 4.067638] },
