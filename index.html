@@ -264,20 +264,35 @@ let currentMarker = L.marker([45.447187, 4.361264], {
         }
 
         // Trouver l'arrêt le plus proche
-        function findClosestStop(currentLat, currentLng, stops) {
-            let closestDistance = Infinity;
-            let closestIndex = -1;
+function findNextStop(currentLat, currentLng, stops) {
+    let closestDistance = Infinity;
+    let closestIndex = -1;
 
-            stops.forEach((stop, index) => {
-                let distance = getDistance(currentLat, currentLng, stop.position[0], stop.position[1]);
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestIndex = index;
-                }
-            });
-
-            return closestIndex;
+    // Trouver l'arrêt le plus proche
+    stops.forEach((stop, index) => {
+        let distance = getDistance(currentLat, currentLng, stop.position[0], stop.position[1]);
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
         }
+    });
+
+    // Indices des arrêts précédent (n-1) et suivant (n+1)
+    let previousIndex = closestIndex - 1;
+    let nextIndex = closestIndex + 1;
+
+    // Calculer les distances à l'arrêt précédent et à l'arrêt suivant
+    let distanceToPrevious = previousIndex >= 0 ? getDistance(currentLat, currentLng, stops[previousIndex].position[0], stops[previousIndex].position[1]) : Infinity;
+    let distanceToNext = nextIndex < stops.length ? getDistance(currentLat, currentLng, stops[nextIndex].position[0], stops[nextIndex].position[1]) : Infinity;
+
+    // Déterminer si on a déjà dépassé l'arrêt actuel
+    if (distanceToNext < distanceToPrevious) {
+        return nextIndex; // On est plus proche de l'arrêt suivant
+    } else {
+        return closestIndex; // On reste à l'arrêt actuel
+    }
+}
+
 
         // Fonction pour mettre à jour la position
         function updatePosition(lat, lng) {
