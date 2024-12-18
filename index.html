@@ -264,7 +264,7 @@ let currentMarker = L.marker([45.447187, 4.361264], {
         }
 
         // Trouver l'arrêt le plus proche
-function findNextStop(currentLat, currentLng, stops) {
+function findClosestStop(currentLat, currentLng, stops) {
     let closestDistance = Infinity;
     let closestIndex = -1;
 
