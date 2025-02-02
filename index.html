@@ -284,10 +284,12 @@ function findClosestStop(currentLat, currentLng, stops) {
     // Calculer les distances à l'arrêt précédent et à l'arrêt suivant
     let distanceToPrevious = previousIndex >= 0 ? getDistance(currentLat, currentLng, stops[previousIndex].position[0], stops[previousIndex].position[1]) : Infinity;
     let distanceToNext = nextIndex < stops.length ? getDistance(currentLat, currentLng, stops[nextIndex].position[0], stops[nextIndex].position[1]) : Infinity;
-
+console.log(distanceToPrevious);
+    console.log(distanceToNext);
     // Déterminer si on a déjà dépassé l'arrêt actuel
     if (distanceToNext < distanceToPrevious) {
         return nextIndex; // On est plus proche de l'arrêt suivant
+        console.log("next");
     } else {
         return closestIndex; // On reste à l'arrêt actuel
     }
